@@ -113,12 +113,17 @@ function Navbar() {
                 display: { xs: 'block', md: 'none' },
               }}
             >
-              {pages.map((page,index) => (
-                <MenuItem key={index} onClick={handleCloseNavMenu}>
-                  <Link to={page.link}><Typography textAlign="center" >{page.title}</Typography></Link>
-                </MenuItem>
-              ))}
-            </Menu>
+              {
+                isLoggedIn ?
+                pages.map((page,index) => (
+                  <MenuItem key={index} onClick={handleCloseNavMenu}>
+                    <Link to={page.link}><Typography textAlign="center" >{page.title}</Typography></Link>
+                  </MenuItem>
+                ))
+                : null
+
+              }
+              </Menu>
           </Box>
           <Link to={"/"}>
           <Typography
