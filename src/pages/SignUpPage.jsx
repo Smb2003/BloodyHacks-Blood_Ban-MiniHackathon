@@ -5,6 +5,7 @@ import { Button } from "../components/Button";
 import { Link, useNavigate } from "react-router-dom";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../config/firebase/index";
+import Swal from "sweetalert2";
 // import { useDispatch } from "react-redux";
 
 export const SignUpPage = () => {
@@ -24,11 +25,24 @@ export const SignUpPage = () => {
         // Signed up
         const user = userCredential.user;
         console.log("User-->", user);
-        navigate("/");
+        navigate("/LoginPage");
+        Swal.fire ({
+          position: "top-center",
+          icon: "success",
+          title: "LoggedIn Successfully!",
+          showConfirmButton: false,
+          timer: 1500
+        });
       })
       .catch((error) => {
         const errorCode = error.code;
         const errorMessage = error.message;
+        Swal.fire({
+          icon: "error",
+          title: "Error...",
+          text: errorMessage,
+          
+      });
         console.log("Error Message--> ", errorMessage);
         // ..
       });

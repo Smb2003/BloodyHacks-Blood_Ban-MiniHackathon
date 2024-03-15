@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "../components/Button";
-import { Link, Navigate, useNavigate, } from "react-router-dom";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { Link,  useNavigate, } from "react-router-dom";
 import { auth, db } from "../config/firebase/index";
 import { useDispatch, useSelector } from "react-redux";
 import { InputField } from "../components/InputFields";
 import { set_auth_users } from "../config/store/slices/userData";
 import { child, push, ref, set } from "firebase/database";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import Swal from "sweetalert2";
 
 
 export const LoginPage = () => {
@@ -18,31 +19,73 @@ export const LoginPage = () => {
     const { id, value } = e.target;
     setUser({ ...userdata, [id]: value });
   };
-
-  const onHandleSubmit = () => {
-    signInWithEmailAndPassword(auth, userdata.email, userdata.password,userdata)
-    .then((userCredential) => {
-      const user = userCredential.user;
-      navigate("/")
-      dispatch(set_auth_users(true))
-      console.log("User Logged in : ",user);
-      const newPostKey = push(child(ref(db), 'Registered_Users')).key;
-      set(ref(db,`Registered_Users/${newPostKey}`),{
-        Username: userdata.username,
-        Email: userdata.email,
-        BloodGroup: userdata.Bloodgroup
+  console.log(userdata);
+ 
+  const onHandleSubmit = (e) => {
+    e.preventDefault()
+    
+    signInWithEmailAndPassword(auth, userdata.email, userdata.password)
+      .then((userCredential) => {
+        // Signed in 
+        const user = userCredential.user;
+        console.log("Signned In",user);
+        navigate("/")
+        dispatch(set_auth_users(true))
+        console.log("User Logged in : ",user);
+        const UserUid = userCredential.user.uid
+        console.log("UserUid: ",UserUid);
+        set(ref(db,`Registered_Users/${UserUid}`),{
+          Username: userdata.username,
+          Email: userdata.email,
+          BloodGroup: userdata.Bloodgroup
+        })
+        Swal.fire ({
+          position: "top-center",
+          icon: "success",
+          title: "LoggedIn Successfully!",
+          showConfirmButton: false,
+          timer: 1500
+        });
+        // ...
       })
-      // ...
-    })
-    .catch((error) => {
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      console.log("Error Message: ",errorMessage);
-      console.log("Error Code: ",errorCode);
-      dispatch(set_auth_users(false))
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.log("errorCode",errorMessage);
+        Swal.fire({
+          icon: "error",
+          title: "Error...",
+          text: errorMessage,
+          
+      });
+        dispatch(set_auth_users(false))
 
-    });
-  };
+      });
+  }
+  // const onHandleSubmit = (e) => {
+  //   e.preventDefault();
+  //   signInWithEmailAndPassword(auth, userdata.email, userdata.password,userdata)
+  //     .then((userCredential) => {
+  //       const user = userCredential.user;
+  //       navigate("/")
+  //       dispatch(set_auth_users(true))
+  //       console.log("User Logged in : ",user);
+  //       const UserUid = userCredential.user.uid
+  //       console.log("UserUid: ",UserUid);
+  //       set(ref(db,`Registered_Users/${UserUid}`),{
+  //         Username: userdata.username,
+  //         Email: userdata.email,
+  //         BloodGroup: userdata.Bloodgroup
+  //       })
+  //     })
+  //     .catch((error) => {
+  //       const errorCode = error.code;
+  //       const errorMessage = error.message;
+  //       console.log("Error Message: ",errorMessage);
+  //       console.log("Error Code: ",errorCode);
+  //       dispatch(set_auth_users(false))
+  //     });
+  // };
   // useEffect(() => {
   //   onHandleSubmit()
   // }, [])
